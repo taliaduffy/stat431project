@@ -1,0 +1,42 @@
+---
+title: "stat431project"
+author: "Talia Duffy, taliagd2"
+date: "2025-05-11"
+output: pdf_document
+---
+
+```{r data}
+library(tidyverse)
+df = read.csv("police_killings.csv")
+```
+
+```{r calculating raw rates}
+df_raw_rates = df |>
+  filter(pop != 0) |>
+  group_by(geo_id, pop, city, state) |>
+  summarise(count = n()) |>
+  arrange(desc(count))
+
+df_raw_rates$raw_rate = df_raw_rates$count / (df_raw_rates$pop / 1000)
+
+df_raw_rates = df_raw_rates |> 
+  arrange(desc(raw_rate))
+
+top_15 = head(df_raw_rates, n = 15)
+bottom_15 = tail(df_raw_rates, n = 15)
+top_15_id = top_15$geo_id
+bottom_15_id = bottom_15$geo_id
+
+```
+
+```{r final dataset}
+df_final = df |>
+  filter(geo_id %in% top_15_id | geo_id %in% bottom_15_id) |>
+  group_by(geo_id, city, state, share_white, share_black, share_hispanic, h_income, pov, pop) |>
+  summarise(count = n()) |>
+  arrange(desc(count))
+  
+df_final
+```
+
+
